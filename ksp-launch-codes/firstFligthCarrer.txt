@@ -1,0 +1,46 @@
+import krpc
+import time
+
+connection = krpc.connect()
+
+vessel = connection.space_center.active_vessel
+
+countdown = ["3", "2", "1", "Lift Off!"]
+
+for i in range(len(countdown)):
+    print(countdown[i])
+    time.sleep(1)
+
+print("Engine on")
+vessel.control.trhottle = 1
+vessel.control.sas = True
+vessel.control.activate_next_stage()
+
+flying = True
+landing = False
+
+while flying:
+    altitude = vessel.flight().mean_altitude
+
+    if altitude > 1000 and altitude < 1500:
+        print(altitude)
+        vessel.control.yaw = 1
+    elif altitude > 1500 and altitude < 2000:
+        print(altitude)
+        vessel.control.yaw = 1
+    else:
+        vessel.control.yaw = 0
+        
+    if altitude > 9000 and altitude < 10000:
+        vessel.control.throtle = 0
+        time.sleep(1)
+        vessel.control.activate_next_stage()
+    if altitude > 11000 and altitude < 11500:
+        vessel.control.throttle = 1
+    if altitude > 40000:
+        landing = True
+        vessel.control.activate_next_stage()
+        
+    if landing == True and altitude < 2000:
+        print("parachute")
+        vessel.control.activate_next_stage()
